@@ -1,5 +1,13 @@
 {
   "dependencies": {
+    "com.boxqkrtm.ide.cursor": "file:/Volumes/yanmasharski/Work/GitHub/com.unity.ide.cursor",
+    "com.drg.consent": "file:/Volumes/yanmasharski/Work/GitHub/drg/drg.consent",
+    "com.drg.consent.google": "file:/Volumes/yanmasharski/Work/GitHub/drg/drg.consent.google",
+    "com.drg.core": "file:/Volumes/yanmasharski/Work/GitHub/drg/drg.core",
+    "com.drg.framework": "file:/Volumes/yanmasharski/Work/GitHub/drg/drg.framework",
+    "com.drg.utils": "file:/Volumes/yanmasharski/Work/GitHub/drg/drg.utils",
+    "com.google.ads.mobile": "11.0.0",
+    "com.google.external-dependency-manager": "1.2.187",
     "com.unity.ai.navigation": "2.0.10",
     "com.unity.ide.rider": "3.0.39",
     "com.unity.ide.visualstudio": "2.0.26",
@@ -44,5 +52,15 @@
     "com.unity.modules.vr": "1.0.0",
     "com.unity.modules.wind": "1.0.0",
     "com.unity.modules.xr": "1.0.0"
-  }
+  },
+  "scopedRegistries": [
+    {
+      "name": "OpenUPM",
+      "url": "https://package.openupm.com",
+      "scopes": [
+        "com.google.ads.mobile",
+        "com.google.external-dependency-manager"
+      ]
+    }
+  ]
 }
