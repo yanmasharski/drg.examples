@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using DRG.Consent;
 using DRG.Core;
 using DRG.Core.Logs;
+using DRG.Firebase;
+using DRG.Firebase.Logs;
 using DRG.Framework;
 using DRG.Utils;
 using UnityEngine;
@@ -23,22 +25,37 @@ public class EntryPoint : MonoBehaviour
 			_logger = new LoggerUnity(ILogger.LogLevel.Debug);
 			entryPoint.serviceLocator.Register<ILogger>(_logger);
 		}
+
+		_logger.LogException(() => new Exception("Test exception"));
 	}
 
 	public class GameEntryPoint : UnityRuntimeBridge
 	{
-		public override IModuleServiceLocator serviceLocator { get; } = new ModuleServiceLocator();
-		protected override ILogger logger { get; } = new LoggerUnity(ILogger.LogLevel.Debug);
+		private readonly LoggerComposite _logger = new(new LoggerUnity(ILogger.LogLevel.Debug));
 
-		protected override void SetupModules(IModuleNode root, IModuleServiceLocator locator, ILogger logger)
+		public override IModuleServiceLocator serviceLocator { get; } = new ModuleServiceLocator();
+		protected override ILogger logger => _logger;
+
+		protected override void SetupModules(IModuleNode root, IModuleServiceLocator locator, ILogger lgr)
 		{
+			lgr.Log(() => "[GameEntryPoint] SetupModules");
+			var firebaseService = new FirebaseService(lgr);
+			_ = firebaseService.InitAsync();
+
 			// Services used by the debug menu (and by the game, if needed).
-			locator.Register<IAppReviewDialog>(new AppReviewDialogProxy(logger));
-			locator.Register<IConsentPlatform>(new ConsentPlatformProxy(new ConsentPlatformGoogle(logger), logger));
+			locator.Register<IAppReviewDialog>(new AppReviewDialogProxy(lgr));
+			locator.Register<IConsentPlatform>(new ConsentPlatformProxy(new ConsentPlatformGoogle(lgr), lgr));
+			locator.Register<IFirebaseService>(firebaseService);
+
+			_logger.Add(new LoggerCrashlytics(ILogger.LogLevel.Fatal, firebaseService));
 
 			// Debug overlay (IMGUI) with quick actions.
 			var menu = gameObject.GetComponent<DebugActionsMenu>() ?? gameObject.AddComponent<DebugActionsMenu>();
-			menu.Initialize(locator, logger);
+			menu.Initialize(locator, lgr);
+
+			lgr.Log(() => "[GameEntryPoint] Initializing root module");
+			_ = root.InitializeAsync();
+			lgr.Log(() => "[GameEntryPoint] Root module initialized");
 		}
 	}
 
@@ -183,7 +200,7 @@ public class EntryPoint : MonoBehaviour
 		{
 			_lastResult = e.Message;
 			_lastResultAt = Time.unscaledTime;
-			_logger.LogException(e);
+			_logger.LogException(() => e);
 		}
 	}
 }
