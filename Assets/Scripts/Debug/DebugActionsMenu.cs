@@ -1,67 +1,18 @@
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 using System.Threading.Tasks;
+using DRG.Ads;
 using DRG.Consent;
 using DRG.Core;
-using DRG.Core.Logs;
 using DRG.Firebase;
-using DRG.Firebase.Logs;
-using DRG.Framework;
 using DRG.Utils;
 using UnityEngine;
 using ILogger = DRG.Core.Logs.ILogger;
 
-public class EntryPoint : MonoBehaviour
+namespace FlappyExample.Debug
 {
-	private ILogger _logger;
-
-	private void Start()
-	{
-		var entryPoint = StaticMonoBehaviour.instance.gameObject.AddComponent<GameEntryPoint>();
-
-		if (!entryPoint.serviceLocator.TryGet<ILogger>(out _logger))
-		{
-			_logger = new LoggerUnity(ILogger.LogLevel.Debug);
-			entryPoint.serviceLocator.Register<ILogger>(_logger);
-		}
-
-		_logger.LogException(() => new Exception("Test exception"));
-	}
-
-	public class GameEntryPoint : UnityRuntimeBridge
-	{
-		private readonly LoggerComposite _logger = new(new LoggerUnity(ILogger.LogLevel.Debug));
-
-		public override IModuleServiceLocator serviceLocator { get; } = new ModuleServiceLocator();
-		protected override ILogger logger => _logger;
-
-		protected override void SetupModules(IModuleNode root, IModuleServiceLocator locator, ILogger lgr)
-		{
-			lgr.Log(() => "[GameEntryPoint] SetupModules");
-			var firebaseService = new FirebaseService(lgr);
-			_ = firebaseService.InitAsync();
-
-			// Services used by the debug menu (and by the game, if needed).
-			locator.Register<IAppReviewDialog>(new AppReviewDialogProxy(lgr));
-			locator.Register<IConsentPlatform>(new ConsentPlatformProxy(new ConsentPlatformGoogle(lgr), lgr));
-			locator.Register<IFirebaseService>(firebaseService);
-
-			_logger.Add(new LoggerCrashlytics(ILogger.LogLevel.Fatal, firebaseService));
-
-			// Debug overlay (IMGUI) with quick actions.
-			var menu = gameObject.GetComponent<DebugActionsMenu>() ?? gameObject.AddComponent<DebugActionsMenu>();
-			menu.Initialize(locator, lgr);
-
-			lgr.Log(() => "[GameEntryPoint] Initializing root module");
-			_ = root.InitializeAsync();
-			lgr.Log(() => "[GameEntryPoint] Root module initialized");
-		}
-	}
-
 	/// <summary>
-	/// Minimal IMGUI-based debug overlay that can invoke registered actions.
-	/// Intended for examples / dev builds.
+	/// Minimal IMGUI overlay for package integration smoke tests.
 	/// </summary>
 	public sealed class DebugActionsMenu : MonoBehaviour
 	{
@@ -84,10 +35,8 @@ public class EntryPoint : MonoBehaviour
 		{
 			_locator = locator;
 			_logger = logger;
-
 			_actions.Clear();
 
-			// Explicit high-signal actions.
 			AddAction("Rate us (AppReviewDialog.Show)", () =>
 			{
 				if (!locator.TryGet<IAppReviewDialog>(out var review))
@@ -95,6 +44,7 @@ public class EntryPoint : MonoBehaviour
 					LogResult("AppReviewDialog not registered");
 					return;
 				}
+
 				review.Show(ok => LogResult($"Rate us completed: {ok}"));
 			});
 
@@ -105,8 +55,65 @@ public class EntryPoint : MonoBehaviour
 					LogResult("ConsentPlatform not registered");
 					return;
 				}
+
 				var ok = await consent.TryShowConsentDialogAsync();
 				LogResult($"Consent completed: {ok}; state={consent.state}");
+			});
+
+			AddAction("Log test exception", () =>
+			{
+				_logger.LogException(() => new Exception("Flappy example test exception"));
+				LogResult("Exception logged.");
+			});
+
+			AddAction("Firebase state", () =>
+			{
+				if (!locator.TryGet<IFirebaseService>(out var firebase))
+				{
+					LogResult("FirebaseService not registered");
+					return;
+				}
+
+				LogResult($"Firebase state: {firebase.InitializationState}");
+			});
+
+			AddAction("Ads: show interstitial", () =>
+			{
+				if (!locator.TryGet<IAdsSystem>(out var ads))
+				{
+					LogResult("AdsSystem not registered");
+					return;
+				}
+
+				var ad = ads.GetFullscreenAd(FullscreenAdType.Interstitial, "debug");
+				LogResult($"Interstitial ready={ad.isReady}");
+				ad.TryShow(imp => LogResult($"Interstitial closed: success={imp?.success}"));
+			});
+
+			AddAction("Ads: show rewarded", () =>
+			{
+				if (!locator.TryGet<IAdsSystem>(out var ads))
+				{
+					LogResult("AdsSystem not registered");
+					return;
+				}
+
+				var ad = ads.GetFullscreenAd(FullscreenAdType.Rewarded, "debug");
+				LogResult($"Rewarded ready={ad.isReady}");
+				ad.TryShow(imp => LogResult($"Rewarded closed: success={imp?.success}"));
+			});
+
+			AddAction("Ads: readiness", () =>
+			{
+				if (!locator.TryGet<IAdsSystem>(out var ads))
+				{
+					LogResult("AdsSystem not registered");
+					return;
+				}
+
+				var intAd = ads.GetFullscreenAd(FullscreenAdType.Interstitial);
+				var rvAd = ads.GetFullscreenAd(FullscreenAdType.Rewarded);
+				LogResult($"Int ready={intAd.isReady}  RV ready={rvAd.isReady}");
 			});
 		}
 
@@ -132,6 +139,7 @@ public class EntryPoint : MonoBehaviour
 					LogException(e);
 				}
 			}
+
 			GUILayout.FlexibleSpace();
 			GUILayout.Label("Tap action to invoke");
 			GUILayout.EndHorizontal();
@@ -139,7 +147,7 @@ public class EntryPoint : MonoBehaviour
 			GUILayout.Space(6);
 
 			_scroll = GUILayout.BeginScrollView(_scroll);
-			for (int i = 0; i < _actions.Count; i++)
+			for (var i = 0; i < _actions.Count; i++)
 			{
 				var item = _actions[i];
 				if (GUILayout.Button(item.Label, GUILayout.Height(34)))
@@ -147,10 +155,11 @@ public class EntryPoint : MonoBehaviour
 					_ = InvokeSafely(item);
 				}
 			}
+
 			GUILayout.EndScrollView();
 
 			GUILayout.Space(6);
-			if (!string.IsNullOrEmpty(_lastResult) && (Time.unscaledTime - _lastResultAt) < 10f)
+			if (!string.IsNullOrEmpty(_lastResult) && Time.unscaledTime - _lastResultAt < 10f)
 			{
 				GUILayout.Label(_lastResult);
 			}
@@ -193,7 +202,7 @@ public class EntryPoint : MonoBehaviour
 		{
 			_lastResult = message;
 			_lastResultAt = Time.unscaledTime;
-			_logger.Log($"[DebugActionsMenu] {message}");
+			_logger.Log(() => $"[DebugActionsMenu] {message}");
 		}
 
 		private void LogException(Exception e)

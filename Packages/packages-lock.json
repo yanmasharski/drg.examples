@@ -8,6 +8,15 @@
         "com.unity.test-framework": "1.1.9"
       }
     },
+    "com.drg.ads": {
+      "version": "file:/Volumes/yanmasharski/Work/GitHub/drg/drg.ads",
+      "depth": 0,
+      "source": "local",
+      "dependencies": {
+        "com.drg.core": "https://github.com/yanmasharski/drg.core.git#1.0.0",
+        "com.drg.utils": "https://github.com/yanmasharski/drg.utils.git#1.0.0"
+      }
+    },
     "com.drg.consent": {
       "version": "file:/Volumes/yanmasharski/Work/GitHub/drg/drg.consent",
       "depth": 0,
@@ -29,12 +38,48 @@
       "source": "local",
       "dependencies": {}
     },
+    "com.drg.data": {
+      "version": "file:/Volumes/yanmasharski/Work/GitHub/drg/drg.data",
+      "depth": 0,
+      "source": "local",
+      "dependencies": {
+        "com.drg.core": "https://github.com/yanmasharski/drg.core.git#1.0.0",
+        "com.drg.utils": "https://github.com/yanmasharski/drg.utils.git#1.0.0"
+      }
+    },
+    "com.drg.data.newtonsoft": {
+      "version": "file:/Volumes/yanmasharski/Work/GitHub/drg/drg.data.newtonsoft",
+      "depth": 0,
+      "source": "local",
+      "dependencies": {
+        "com.drg.data": "https://github.com/yanmasharski/drg.data.git#1.0.0",
+        "com.unity.nuget.newtonsoft-json": "2.0.0"
+      }
+    },
+    "com.drg.firebase": {
+      "version": "file:/Volumes/yanmasharski/Work/GitHub/drg/drg.firebase",
+      "depth": 0,
+      "source": "local",
+      "dependencies": {
+        "com.drg.core": "https://github.com/yanmasharski/drg.core.git#1.0.0",
+        "com.drg.framework": "https://github.com/yanmasharski/drg.framework.git#1.0.0"
+      }
+    },
     "com.drg.framework": {
       "version": "file:/Volumes/yanmasharski/Work/GitHub/drg/drg.framework",
       "depth": 0,
       "source": "local",
       "dependencies": {
         "com.drg.core": "https://github.com/yanmasharski/drg.core.git#1.0.0"
+      }
+    },
+    "com.drg.remoteconfig": {
+      "version": "file:/Volumes/yanmasharski/Work/GitHub/drg/drg.remoteconfig",
+      "depth": 0,
+      "source": "local",
+      "dependencies": {
+        "com.drg.core": "https://github.com/yanmasharski/drg.core.git#1.0.0",
+        "com.drg.utils": "https://github.com/yanmasharski/drg.utils.git#1.0.0"
       }
     },
     "com.drg.utils": {
@@ -61,6 +106,28 @@
       "source": "registry",
       "dependencies": {},
       "url": "https://package.openupm.com"
+    },
+    "com.google.firebase.app": {
+      "version": "file:/Volumes/yanmasharski/Work/GitHub/0-packages/com.google.firebase.app-13.11.0.tgz",
+      "depth": 0,
+      "source": "local-tarball",
+      "dependencies": {
+        "com.google.external-dependency-manager": "1.2.186"
+      }
+    },
+    "com.google.firebase.crashlytics": {
+      "version": "file:/Volumes/yanmasharski/Work/GitHub/0-packages/com.google.firebase.crashlytics-13.11.0.tgz",
+      "depth": 0,
+      "source": "local-tarball",
+      "dependencies": {
+        "com.google.firebase.app": "13.11.0"
+      }
+    },
+    "com.unity.2d.sprite": {
+      "version": "1.0.0",
+      "depth": 0,
+      "source": "builtin",
+      "dependencies": {}
     },
     "com.unity.ai.navigation": {
       "version": "2.0.10",
@@ -145,6 +212,13 @@
     "com.unity.nuget.mono-cecil": {
       "version": "1.11.6",
       "depth": 3,
+      "source": "registry",
+      "dependencies": {},
+      "url": "https://packages.unity.com"
+    },
+    "com.unity.nuget.newtonsoft-json": {
+      "version": "3.2.2",
+      "depth": 1,
       "source": "registry",
       "dependencies": {},
       "url": "https://packages.unity.com"

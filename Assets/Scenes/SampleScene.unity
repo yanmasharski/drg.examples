@@ -266,9 +266,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 330585543}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2842142599355402093f8401dfd98cfc, type: 3}
+  m_Script: {fileID: 11500000, guid: e4d3c2b1a0f9e8d7c6b5a4938271605f, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EntryPoint
+  m_EditorClassIdentifier: Assembly-CSharp::FlappyExample.Bootstrap.GameBootstrap
 --- !u!1 &410087039
 GameObject:
   m_ObjectHideFlags: 0
