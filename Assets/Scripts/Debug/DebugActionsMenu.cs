@@ -135,6 +135,17 @@ namespace FlappyExample.Debug
 				var last = events[events.Count - 1];
 				LogResult($"Analytics: {events.Count} total. Last: {last.Name}");
 			});
+
+			AddAction("Analytics: log file path", () =>
+			{
+				if (!locator.TryGet<AnalyticsGatewayFile>(out var file))
+				{
+					LogResult("AnalyticsGatewayFile not registered");
+					return;
+				}
+
+				LogResult($"Analytics log: {file.FilePath}");
+			});
 		}
 
 		private void OnGUI()

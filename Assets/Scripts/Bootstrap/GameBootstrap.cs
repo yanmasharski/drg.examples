@@ -54,10 +54,14 @@ namespace FlappyExample.Bootstrap
 			var analyticsComposite = new AnalyticsGatewayComposite();
 			var analyticsMemory = new AnalyticsGatewayMemory();
 			analyticsComposite.Add(analyticsMemory);
+			var analyticsFile = new AnalyticsGatewayFile(
+				System.IO.Path.Combine(Application.persistentDataPath, "analytics.log"));
+			analyticsComposite.Add(analyticsFile);
 			AnalyticsEvent.Logger = _logger;
 			_analytics = analyticsComposite;
 			_locator.Register<IAnalyticsGateway>(_analytics);
 			_locator.Register(analyticsMemory);
+			_locator.Register(analyticsFile);
 
 			var consent = new ConsentPlatformProxy(new ConsentPlatformGoogle(_logger), _logger);
 			_locator.Register<IConsentPlatform>(consent);
