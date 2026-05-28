@@ -115,6 +115,7 @@ namespace FlappyExample.Game
 			_spawner.SetActive(true);
 			SetState(FlappyGameState.Playing);
 			ScoreChanged?.Invoke(_score);
+			_services.Analytics?.Track(new EventGameStart(_deathCount + 1));
 			_bird.Flap();
 			_flapCount++;
 		}
@@ -193,6 +194,7 @@ namespace FlappyExample.Game
 
 			_deathCount++;
 			PersistProgress();
+			_services.Analytics?.Track(new EventGameOver(_score, _highScore, _usedContinue));
 			TryShowInterstitial();
 			TryRequestReview();
 

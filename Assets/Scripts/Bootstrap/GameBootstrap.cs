@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using DRG.Ads;
+using DRG.Analytics;
 using DRG.Consent;
 using DRG.Core;
 using DRG.Core.Logs;
@@ -27,6 +28,7 @@ namespace FlappyExample.Bootstrap
 		private ILogger _logger;
 		private ExampleServiceLocator _locator;
 		private IAdsSystem _ads;
+		private IAnalyticsGateway _analytics;
 		private IAppReviewDialog _appReview;
 		private IFirebaseService _firebase;
 		private IRemoteConfig _remoteConfig;
@@ -48,6 +50,14 @@ namespace FlappyExample.Bootstrap
 			_locator.Register<ILogger>(_logger);
 
 			await InitFirebaseAsync(compositeLogger);
+
+			var analyticsComposite = new AnalyticsGatewayComposite();
+			var analyticsMemory = new AnalyticsGatewayMemory();
+			analyticsComposite.Add(analyticsMemory);
+			AnalyticsEvent.Logger = _logger;
+			_analytics = analyticsComposite;
+			_locator.Register<IAnalyticsGateway>(_analytics);
+			_locator.Register(analyticsMemory);
 
 			var consent = new ConsentPlatformProxy(new ConsentPlatformGoogle(_logger), _logger);
 			_locator.Register<IConsentPlatform>(consent);
@@ -75,6 +85,7 @@ namespace FlappyExample.Bootstrap
 			{
 				Logger = _logger,
 				Ads = _ads,
+				Analytics = _analytics,
 				AppReview = _appReview,
 				HighScoreKey = HighScoreKey,
 				StatsKey = StatsKey,

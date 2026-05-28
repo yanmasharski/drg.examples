@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using DRG.Ads;
+using DRG.Analytics;
 using DRG.Consent;
 using DRG.Core;
 using DRG.Firebase;
@@ -114,6 +115,25 @@ namespace FlappyExample.Debug
 				var intAd = ads.GetFullscreenAd(FullscreenAdType.Interstitial);
 				var rvAd = ads.GetFullscreenAd(FullscreenAdType.Rewarded);
 				LogResult($"Int ready={intAd.isReady}  RV ready={rvAd.isReady}");
+			});
+
+			AddAction("Analytics: recent events", () =>
+			{
+				if (!locator.TryGet<AnalyticsGatewayMemory>(out var memory))
+				{
+					LogResult("AnalyticsGatewayMemory not registered");
+					return;
+				}
+
+				var events = memory.Events;
+				if (events.Count == 0)
+				{
+					LogResult("Analytics: no events tracked yet");
+					return;
+				}
+
+				var last = events[events.Count - 1];
+				LogResult($"Analytics: {events.Count} total. Last: {last.Name}");
 			});
 		}
 

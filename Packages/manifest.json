@@ -2,6 +2,7 @@
   "dependencies": {
     "com.boxqkrtm.ide.cursor": "file:/Volumes/yanmasharski/Work/GitHub/com.unity.ide.cursor",
     "com.drg.ads": "file:/Volumes/yanmasharski/Work/GitHub/drg/drg.ads",
+    "com.drg.analytics": "file:/Volumes/yanmasharski/Work/GitHub/drg/drg.analytics",
     "com.drg.consent": "file:/Volumes/yanmasharski/Work/GitHub/drg/drg.consent",
     "com.drg.consent.google": "file:/Volumes/yanmasharski/Work/GitHub/drg/drg.consent.google",
     "com.drg.core": "file:/Volumes/yanmasharski/Work/GitHub/drg/drg.core",
