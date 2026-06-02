@@ -8,7 +8,7 @@ namespace FlappyExample.Integration
 	/// <summary>
 	/// Stand-in <see cref="IRemoteConfig"/> for the Flappy example.
 	/// Returns hardcoded values that represent a typical remote config payload.
-	/// Replace with <see cref="RemoteConfigComposite"/> wired to real providers in production.
+	/// Replace with <see cref="RemoteConfigLayered"/> wired to real providers in production.
 	/// </summary>
 	public sealed class ExampleMockRemoteConfig : IRemoteConfig
 	{
