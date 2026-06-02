@@ -70,10 +70,10 @@ namespace FlappyExample.Bootstrap
 			{
 				_analytics.Track(new AnalyticsEvent("attribution_received", new()
 				{
-					["network"]     = data.Network ?? "organic",
-					["campaign"]    = data.Campaign ?? "None",
-					["campaign_id"] = data.CampaignId ?? "None",
-					["mmp"]         = data.ProviderName,
+					["network"] = data.network ?? "organic",
+					["campaign"] = data.campaign ?? "None",
+					["campaign_id"] = data.campaignId ?? "None",
+					["mmp"] = data.providerName,
 				}));
 			});
 			_attribution = attributionMemory;
@@ -81,11 +81,11 @@ namespace FlappyExample.Bootstrap
 			_locator.Register(attributionMemory);
 
 			attributionMemory.Simulate(new AttributionData(
-				network:      "Facebook Ads",
-				campaign:     "example_campaign",
-				campaignId:   "12345",
-				adset:        "example_adset",
-				creative:     null,
+				network: "Facebook Ads",
+				campaign: "example_campaign",
+				campaignId: "12345",
+				adset: "example_adset",
+				creative: null,
 				providerName: "Memory"
 			));
 

@@ -95,6 +95,7 @@
       "source": "local",
       "dependencies": {
         "com.drg.core": "https://github.com/yanmasharski/drg.core.git#1.0.0",
+        "com.drg.data": "https://github.com/yanmasharski/drg.data.git#1.0.0",
         "com.drg.utils": "https://github.com/yanmasharski/drg.utils.git#1.0.0"
       }
     },
