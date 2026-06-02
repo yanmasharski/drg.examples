@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 using DRG.Ads;
 using DRG.Analytics;
+using DRG.Attribution;
 using DRG.Consent;
 using DRG.Core;
 using DRG.Core.Logs;
@@ -29,6 +30,7 @@ namespace FlappyExample.Bootstrap
 		private ExampleServiceLocator _locator;
 		private IAdsSystem _ads;
 		private IAnalyticsGateway _analytics;
+		private IAttributionProvider _attribution;
 		private IAppReviewDialog _appReview;
 		private IFirebaseService _firebase;
 		private IRemoteConfig _remoteConfig;
@@ -63,13 +65,41 @@ namespace FlappyExample.Bootstrap
 			_locator.Register(analyticsMemory);
 			_locator.Register(analyticsFile);
 
+			var attributionMemory = new AttributionProviderMemory();
+			attributionMemory.attributionReceived.Subscribe(data =>
+			{
+				_analytics.Track(new AnalyticsEvent("attribution_received", new()
+				{
+					["network"]     = data.Network ?? "organic",
+					["campaign"]    = data.Campaign ?? "None",
+					["campaign_id"] = data.CampaignId ?? "None",
+					["mmp"]         = data.ProviderName,
+				}));
+			});
+			_attribution = attributionMemory;
+			_locator.Register<IAttributionProvider>(_attribution);
+			_locator.Register(attributionMemory);
+
+			attributionMemory.Simulate(new AttributionData(
+				network:      "Facebook Ads",
+				campaign:     "example_campaign",
+				campaignId:   "12345",
+				adset:        "example_adset",
+				creative:     null,
+				providerName: "Memory"
+			));
+
 			var consent = new ConsentPlatformProxy(new ConsentPlatformGoogle(_logger), _logger);
 			_locator.Register<IConsentPlatform>(consent);
 			_ = ShowConsentAsync(consent);
 
 			var adsSystem = new AdsSystem(_logger);
-			adsSystem.Add(new ExampleMockFullscreenAd(_logger), FullscreenAdType.Interstitial);
-			adsSystem.Add(new ExampleMockFullscreenAd(_logger), FullscreenAdType.Rewarded);
+			adsSystem.Add(
+				new FullscreenAdProxy(new ExampleMockFullscreenAd(_logger), FullscreenAdType.Interstitial, _logger),
+				FullscreenAdType.Interstitial);
+			adsSystem.Add(
+				new FullscreenAdProxy(new ExampleMockFullscreenAd(_logger), FullscreenAdType.Rewarded, _logger),
+				FullscreenAdType.Rewarded);
 			_ads = adsSystem;
 			_locator.Register<IAdsSystem>(_ads);
 

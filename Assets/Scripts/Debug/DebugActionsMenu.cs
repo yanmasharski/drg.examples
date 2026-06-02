@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using DRG.Ads;
 using DRG.Analytics;
+using DRG.Attribution;
 using DRG.Consent;
 using DRG.Core;
 using DRG.Firebase;
@@ -115,6 +116,17 @@ namespace FlappyExample.Debug
 				var intAd = ads.GetFullscreenAd(FullscreenAdType.Interstitial);
 				var rvAd = ads.GetFullscreenAd(FullscreenAdType.Rewarded);
 				LogResult($"Int ready={intAd.isReady}  RV ready={rvAd.isReady}");
+			});
+
+			AddAction("Attribution: current data", () =>
+			{
+				if (!locator.TryGet<IAttributionProvider>(out var attribution))
+				{
+					LogResult("IAttributionProvider not registered");
+					return;
+				}
+
+				LogResult($"Attribution: {attribution.GetAttributionSummary()}");
 			});
 
 			AddAction("Analytics: recent events", () =>

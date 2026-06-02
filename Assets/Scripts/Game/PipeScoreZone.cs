@@ -1,17 +1,18 @@
-using System;
+using DRG.Core;
 using UnityEngine;
 
 namespace FlappyExample.Game
 {
 	public sealed class PipeScoreZone : MonoBehaviour
 	{
-		public event Action Scored;
+		private readonly Observable<Unit> _scored = new();
+		private bool _scoredOnce;
 
-		private bool _scored;
+		public IObservable<Unit> scored => _scored;
 
 		private void OnTriggerEnter2D(Collider2D other)
 		{
-			if (_scored)
+			if (_scoredOnce)
 			{
 				return;
 			}
@@ -21,8 +22,8 @@ namespace FlappyExample.Game
 				return;
 			}
 
-			_scored = true;
-			Scored?.Invoke();
+			_scoredOnce = true;
+			_scored.Notify(Unit.Value);
 		}
 	}
 }

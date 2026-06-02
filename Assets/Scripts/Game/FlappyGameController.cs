@@ -1,5 +1,6 @@
 using System;
 using DRG.Ads;
+using DRG.Core;
 using DRG.Data;
 using DRG.Data.Serialization;
 using DRG.Utils;
@@ -41,8 +42,14 @@ namespace FlappyExample.Game
 		public int Score => _score;
 		public int HighScore => _highScore;
 
-		public event Action StateChanged;
-		public event Action<int> ScoreChanged;
+		private readonly Observable<Unit> _stateChanged = new();
+		private readonly Observable<int> _scoreChanged = new();
+
+		public DRG.Core.IObservable<Unit> stateChanged => _stateChanged;
+		public DRG.Core.IObservable<int> scoreChanged => _scoreChanged;
+
+		private IDisposable _obstacleHitSubscription;
+		private IDisposable _pipeScoredSubscription;
 
 		public void Initialize(FlappyGameServices services)
 		{
@@ -56,8 +63,8 @@ namespace FlappyExample.Game
 			_spawner = spawner;
 			_hud = hud;
 
-			_bird.Relay.ObstacleHit += OnObstacleHit;
-			_spawner.PipeScored += OnPipeScored;
+			_obstacleHitSubscription = _bird.Relay.obstacleHit.Subscribe(OnObstacleHit);
+			_pipeScoredSubscription = _spawner.pipeScored.Subscribe(OnPipeScored);
 
 			_hud.Bind(this);
 			EnterMenu();
@@ -65,15 +72,10 @@ namespace FlappyExample.Game
 
 		private void OnDestroy()
 		{
-			if (_bird != null && _bird.Relay != null)
-			{
-				_bird.Relay.ObstacleHit -= OnObstacleHit;
-			}
-
-			if (_spawner != null)
-			{
-				_spawner.PipeScored -= OnPipeScored;
-			}
+			_obstacleHitSubscription?.Dispose();
+			_obstacleHitSubscription = null;
+			_pipeScoredSubscription?.Dispose();
+			_pipeScoredSubscription = null;
 		}
 
 		private void Update()
@@ -114,7 +116,7 @@ namespace FlappyExample.Game
 			_bird.SetSimulation(true);
 			_spawner.SetActive(true);
 			SetState(FlappyGameState.Playing);
-			ScoreChanged?.Invoke(_score);
+			_scoreChanged.Notify(_score);
 			_services.Analytics?.Track(new EventGameStart(_deathCount + 1));
 			_bird.Flap();
 			_flapCount++;
@@ -132,7 +134,8 @@ namespace FlappyExample.Game
 				return;
 			}
 
-			if (_services.Ads == null) return;
+			if (_services.Ads == null)
+				return;
 
 			var rewarded = _services.Ads.GetFullscreenAd(FullscreenAdType.Rewarded, "flappy_continue");
 			if (!rewarded.TryShow(OnRewardedClosed))
@@ -175,7 +178,7 @@ namespace FlappyExample.Game
 			}
 
 			_score++;
-			ScoreChanged?.Invoke(_score);
+			_scoreChanged.Notify(_score);
 		}
 
 		private void CheckBounds()
@@ -243,8 +246,10 @@ namespace FlappyExample.Game
 
 		private void TryShowInterstitial()
 		{
-			if (_deathCount % InterstitialEveryDeaths != 0) return;
-			if (_services.Ads == null) return;
+			if (_deathCount % InterstitialEveryDeaths != 0)
+				return;
+			if (_services.Ads == null)
+				return;
 
 			_services.Ads.GetFullscreenAd(FullscreenAdType.Interstitial, "flappy_game_over").TryShow();
 		}
@@ -273,7 +278,7 @@ namespace FlappyExample.Game
 		private void SetState(FlappyGameState state)
 		{
 			_state = state;
-			StateChanged?.Invoke();
+			_stateChanged.Notify(Unit.Value);
 		}
 
 		public bool CanContinue => _state == FlappyGameState.GameOver && !_usedContinue;

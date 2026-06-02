@@ -1,3 +1,5 @@
+using System;
+using DRG.Core;
 using FlappyExample.Game;
 using UnityEngine;
 using UnityEngine.UI;
@@ -7,6 +9,8 @@ namespace FlappyExample.UI
 	public sealed class FlappyHud : MonoBehaviour
 	{
 		private FlappyGameController _controller;
+		private IDisposable _stateChangedSubscription;
+		private IDisposable _scoreChangedSubscription;
 
 		private Text _scoreText;
 		private GameObject _menuPanel;
@@ -21,20 +25,15 @@ namespace FlappyExample.UI
 		{
 			_controller = controller;
 			BuildUi();
-			_controller.StateChanged += Refresh;
-			_controller.ScoreChanged += OnScoreChanged;
+			_stateChangedSubscription = _controller.stateChanged.Subscribe(Refresh);
+			_scoreChangedSubscription = _controller.scoreChanged.Subscribe(OnScoreChanged);
 			Refresh();
 		}
 
 		private void OnDestroy()
 		{
-			if (_controller == null)
-			{
-				return;
-			}
-
-			_controller.StateChanged -= Refresh;
-			_controller.ScoreChanged -= OnScoreChanged;
+			_stateChangedSubscription?.Dispose();
+			_scoreChangedSubscription?.Dispose();
 		}
 
 		private void BuildUi()

@@ -17,6 +17,22 @@
         "com.drg.utils": "https://github.com/yanmasharski/drg.utils.git#1.0.0"
       }
     },
+    "com.drg.analytics": {
+      "version": "file:/Volumes/yanmasharski/Work/GitHub/drg/drg.analytics",
+      "depth": 0,
+      "source": "local",
+      "dependencies": {
+        "com.drg.core": "https://github.com/yanmasharski/drg.core.git#1.0.0"
+      }
+    },
+    "com.drg.attribution": {
+      "version": "file:/Volumes/yanmasharski/Work/GitHub/drg/drg.attribution",
+      "depth": 0,
+      "source": "local",
+      "dependencies": {
+        "com.drg.core": "https://github.com/yanmasharski/drg.core.git#1.0.0"
+      }
+    },
     "com.drg.consent": {
       "version": "file:/Volumes/yanmasharski/Work/GitHub/drg/drg.consent",
       "depth": 0,

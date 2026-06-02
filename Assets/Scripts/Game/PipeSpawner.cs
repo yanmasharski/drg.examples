@@ -1,4 +1,4 @@
-using System;
+using DRG.Core;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -6,7 +6,9 @@ namespace FlappyExample.Game
 {
 	public sealed class PipeSpawner : MonoBehaviour
 	{
-		public event Action PipeScored;
+		private readonly Observable<Unit> _pipeScored = new();
+
+		public IObservable<Unit> pipeScored => _pipeScored;
 		[SerializeField] private float spawnInterval = 2.2f;
 		[SerializeField] private float pipeSpeed = 3.5f;
 		[SerializeField] private float gapSize = 3.2f;
@@ -100,7 +102,7 @@ namespace FlappyExample.Game
 			collider.size = new Vector2(0.5f, 4f);
 
 			var scoreZone = zone.AddComponent<PipeScoreZone>();
-			scoreZone.Scored += () => PipeScored?.Invoke();
+			scoreZone.scored.Subscribe(_ => _pipeScored.Notify(Unit.Value));
 		}
 
 		private static Sprite CreateColoredSprite(Color color)
